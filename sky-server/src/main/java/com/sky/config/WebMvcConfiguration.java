@@ -1,6 +1,5 @@
 package com.sky.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sky.interceptor.JwtTokenAdminInterceptor;
 import com.sky.interceptor.JwtTokenUserInterceptor;
 import com.sky.json.JacksonObjectMapper;
@@ -40,7 +39,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/login", "/user/sendMsg", "/user/register","/user/shop/status");
+                .excludePathPatterns("/user/user/login", "/user/user/sendMsg", "/user/user/register");
     }
 
     /**
@@ -48,11 +47,17 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      */
     @Bean
     public OpenAPI openApi() {
+        // 创建一个新的 OpenAPI 对象
         return new OpenAPI()
+                // 设置 OpenAPI 的信息
                 .info(new Info()
+                        // 设置 OpenAPI 的标题
                         .title("苍穹外卖项目接口文档")
+                        // 设置 OpenAPI 的版本号
                         .version("2.0")
+                        // 设置 OpenAPI 的描述
                         .description("苍穹外卖项目接口文档"))
+                // 设置 OpenAPI 的安全要求
                 .schemaRequirement("BearerAuth",
                         new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
@@ -68,6 +73,6 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         // 设置对象映射器，替换默认的对象映射器java-json
         converter.setObjectMapper(new JacksonObjectMapper());
         // 将消息转换器对象添加到转换器列表中，并放在首位
-        converters.add(0, converter);
+        converters.addFirst(converter);
     }
 }
