@@ -25,8 +25,6 @@ public interface CategoryMapper {
 
     /**
      * 分页查询
-     * @param categoryPageQueryDTO
-     * @return
      */
     Page<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
 
@@ -45,6 +43,7 @@ public interface CategoryMapper {
     void update(Category category);
 
     /**
+     *
      * 根据类型查询分类
      * @param type
      */

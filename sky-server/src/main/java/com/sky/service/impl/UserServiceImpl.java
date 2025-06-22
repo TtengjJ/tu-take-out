@@ -64,8 +64,9 @@ public class UserServiceImpl implements UserService {
         map.put("js_code", code);
         map.put("grant_type","authorization_code");
         log.info("微信登录请求参数：{}", map);
-        String json= HttpClientUtil.doGet(wx_login,map);
 
+        String json= HttpClientUtil.doGet(wx_login,map);
+        log.info("微信登录返回结果：{}", json);
         //判断openid是否存在
         //json解析
         JSONObject jsonObject= JSON.parseObject(json);

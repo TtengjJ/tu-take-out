@@ -53,15 +53,10 @@
         select id, name, image, category_id categoryId, price, description, status, create_time createTime, update_time updateTime, create_user createUser, update_user updateUser
         from dish
         <where>
-            <if test="name != null and name != ''">
-                and name like concat('%', #{name}, '%')
-            </if>
             <if test="categoryId != null">
                 and category_id = #{categoryId}
             </if>
-            <if test="status != null">
-                and status = #{status}
-            </if>
+            and status = 1
         </where>
         order by update_time desc
 
