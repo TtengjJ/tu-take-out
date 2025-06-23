@@ -27,6 +27,7 @@ public interface SetmealMapper {
      */
     List<Setmeal> list(Setmeal setmeal);
 
+    //根据分类id查询套餐列表
     List<DishItemVO> getById(Long id);
 
 
