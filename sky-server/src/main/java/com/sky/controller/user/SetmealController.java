@@ -6,11 +6,12 @@ import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
 public class SetmealController {
     @Autowired
@@ -19,9 +20,12 @@ public class SetmealController {
 
     //根据分类id查询套餐列表
     @GetMapping("/list")
+    @Cacheable(value = "setmealCache",key = "#categoryId")//key: setmealCache::categoryId
     public Result<List<Setmeal>> list(Long categoryId){
         Setmeal setmeal = new Setmeal();
         setmeal.setCategoryId(categoryId);
+        setmeal.setStatus(StatusConstant.ENABLE);
+
         return Result.success(setmealService.list(setmeal));
     }
 

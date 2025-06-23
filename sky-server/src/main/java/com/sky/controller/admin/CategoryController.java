@@ -71,9 +71,6 @@ public class CategoryController {
 
     /**
      * 启用、禁用分类
-     * @param status
-     * @param id
-     * @return
      */
     @PostMapping("/status/{status}")
     public Result<String> startOrStop(@PathVariable("status") Integer status, Long id){
