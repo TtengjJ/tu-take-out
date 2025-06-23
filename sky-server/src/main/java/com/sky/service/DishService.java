@@ -44,7 +44,8 @@ public interface DishService {
     /**
      * 根据分类id查询菜品
      */
-    List<DishVO> list(Long categoryId);
+    List<DishVO> list(Dish dish);
 
 
+    List<DishVO> getlist(Long categoryId);
 }

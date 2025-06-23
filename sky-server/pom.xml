@@ -11,6 +11,11 @@
     <artifactId>sky-server</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
         <!-- 项目内部模块 -->
         <dependency>
             <groupId>com.sky</groupId>
