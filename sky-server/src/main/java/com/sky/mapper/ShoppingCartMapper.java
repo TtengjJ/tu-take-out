@@ -27,4 +27,6 @@ public interface ShoppingCartMapper {
     void clearById(Long userId);
 
     void deleteByDTO(ShoppingCart shoppingCart);
+
+
 }
