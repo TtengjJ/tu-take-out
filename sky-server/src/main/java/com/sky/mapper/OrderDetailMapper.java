@@ -10,4 +10,6 @@ import java.util.List;
 public interface OrderDetailMapper {
     //批量插入订单明细
     void insertBatch(List<OrderDetail> orderDetailList);
+
+    List<OrderDetail> getByOrderId(Long id);
 }
