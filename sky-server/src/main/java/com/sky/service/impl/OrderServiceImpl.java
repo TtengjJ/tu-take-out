@@ -1,7 +1,9 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
@@ -14,6 +16,8 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.OrderService;
+import com.sky.utils.WeChatPayUtil;
+import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -38,6 +42,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;
+
+    @Autowired
+    private WeChatPayUtil weChatPayUtil;
 
     @Override
     public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO) {
@@ -86,4 +93,34 @@ public class OrderServiceImpl implements OrderService {
                 .orderNumber(orders.getNumber())
                 .build();
     }
+
+    @Override
+    public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+        // 根据订单号查询订单
+        String orderNumber = ordersPaymentDTO.getOrderNumber();
+
+        //查询订单
+        Orders orders = orderMapper.getByNumber(orderNumber);
+
+        // 调用微信支付接口，生成预支付交易单
+        JSONObject jsonObject = weChatPayUtil.pay(
+                orderNumber,  // 商户订单号
+                orders.getAmount(), // 支付金额
+                "苍穹外卖订单", // 商品描述
+                orders.getUserId().toString() // 用户openid,需要从数据库获取
+        );
+
+        // 封装返回结果
+        OrderPaymentVO vo = OrderPaymentVO.builder()
+                .nonceStr(jsonObject.getString("nonceStr"))
+                .paySign(jsonObject.getString("paySign"))
+                .timeStamp(jsonObject.getString("timeStamp"))
+                .signType(jsonObject.getString("signType"))
+                .packageStr(jsonObject.getString("package"))
+                .build();
+
+        return vo;
+    }
+
+
 }

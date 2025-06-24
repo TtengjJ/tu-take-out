@@ -18,4 +18,7 @@
                      #{packAmount}, #{tablewareNumber}, #{tablewareStatus}
                  )
     </insert>
+    <select id="getByNumber" resultType="com.sky.entity.Orders">
+        select * from orders where number = #{number}
+    </select>
 </mapper>
