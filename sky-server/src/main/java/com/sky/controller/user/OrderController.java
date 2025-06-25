@@ -69,19 +69,19 @@ public class OrderController {
 
     //再来一单
     @PostMapping("/repetition/{id}")
-    public Result<String> repetition(@PathVariable Long id) {
+    public Result repetition(@PathVariable Long id) {
         log.info("再来一单，订单ID：{}", id);
         orderService.repetition(id);
-        return Result.success("请前往购物车结算");
+        return Result.success();
     }
 
     //催单
-//    @GetMapping("/reminder/{id}")
-//    public Result<String> reminder(@PathVariable Long id) {
-//        log.info("用户催单，订单ID：{}", id);
-//        orderService.reminder(id);
-//        return Result.success("催单成功");
-//    }
+    @GetMapping("/reminder/{id}")
+    public Result reminder(@PathVariable Long id) {
+        log.info("用户催单，订单ID：{}", id);
+        orderService.reminder(id);
+        return Result.success();
+    }
 
 
 }

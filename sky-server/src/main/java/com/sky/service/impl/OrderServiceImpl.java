@@ -58,6 +58,32 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private WebSocketServer webSocketServer;
+    // 定义消息类型常量
+    private static final String MESSAGE_TYPE_NEW_ORDER = "1";
+    private static final String MESSAGE_TYPE_REMINDER = "2";
+    //发送消息
+    private void sendReminderMessage(Orders order) {
+        String content = String.format("催单，请及时处理，订单号:%s", order.getNumber());
+        sendOrderMessage(MESSAGE_TYPE_REMINDER, order, content);
+    }
+    //发送消息
+    private void sendNewOrderMessage(Orders order) {
+        String content = String.format("新订单，请及时处理，订单号:%s", order.getNumber());
+        sendOrderMessage(MESSAGE_TYPE_NEW_ORDER, order, content);
+    }
+
+    // 抽取发送消息的方法
+    private void sendOrderMessage(String type, Orders order, String content) {
+        Map<String, Object> messageMap = new HashMap<>(3);
+        messageMap.put("type", type);
+        messageMap.put("orderId", order.getId());
+        messageMap.put("content", content);
+
+        String message = JSONObject.toJSONString(messageMap);
+        webSocketServer.sendToAllClient(message);
+        log.info("发送WebSocket消息：{}", message);
+    }
+
 
     @Override
     public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO) {
@@ -133,15 +159,8 @@ public class OrderServiceImpl implements OrderService {
         ordersToUpdate.setPayMethod(1); // 支付方式：微信支付
         orderMapper.update(ordersToUpdate);
 
-        // 发送WebSocket消息.type,orderID,content
-        Map map = new HashMap();
-        map.put("type", "1");//1来电提醒,2催单
-        map.put("orderId", orders.getId());
-        map.put("content", "新订单，请及时处理，订单号:" + orderNumber);
-        //转换为JSON字符串
-        String message = JSONObject.toJSONString(map);
-        //发送WebSocket消息
-        webSocketServer.sendToAllClient(message);
+        sendNewOrderMessage(orders);
+
 
         return OrderPaymentVO.builder()
                 .nonceStr(jsonObject.getString("nonceStr"))
@@ -352,10 +371,7 @@ public class OrderServiceImpl implements OrderService {
         if (orders == null) {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND); //订单不存在
         }
-        //判断订单状态
-        if (!Objects.equals(orders.getStatus(), Orders.DELIVERY_IN_PROGRESS)) {
-            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR); //订单状态不允许提醒
-        }
-
+        sendReminderMessage(orders);
     }
+
 }

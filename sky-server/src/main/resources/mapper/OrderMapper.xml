@@ -36,7 +36,6 @@
     </update>
 
 
-
     <select id="getByNumber" resultType="com.sky.entity.Orders">
         select * from orders where number = #{number}
     </select>
@@ -68,4 +67,54 @@
     <select id="getById" resultType="com.sky.entity.Orders">
         select * from orders where id = #{id}
     </select>
+    <!--查询指定日期营业额-->
+    <select id="getTurnoverByDate" resultType="java.lang.Double">
+            select sum(amount) from orders
+            where status=5
+            and order_time &gt;= #{date}
+            and order_time &lt; #{date} + interval 1 day
+    </select>
+    <select id="getUserTotalByDate" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT user_id)
+        FROM orders
+        WHERE order_time &lt; DATE_ADD(#{date}, INTERVAL 1 DAY)
+    </select>
+    <select id="getNewUserByDate" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT user_id)
+        FROM orders
+        WHERE order_time >= #{date}
+        AND order_time &lt; DATE_ADD(#{date}, INTERVAL 1 DAY)
+        AND user_id NOT IN (
+        SELECT DISTINCT user_id
+        FROM orders
+        WHERE order_time &lt; #{date}
+        )
+
+    </select>
+<!--    每日订单数-->
+    <select id="getOrderCountByDate" resultType="java.lang.Integer">
+            SELECT COUNT(id) FROM orders
+            WHERE order_time &gt;= #{date}
+            AND order_time &lt; DATE_ADD(#{date}, INTERVAL 1 DAY)
+    </select>
+
+    <!--    有效订单数-->
+    <select id="getValidOrderCountByDate" resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM orders
+        WHERE order_time &gt;= #{date}
+        AND order_time &lt; DATE_ADD(#{date}, INTERVAL 1 DAY)
+        AND status = 5
+    </select>
+    <select id="salesTop10Report" resultType="com.sky.dto.GoodsSalesDTO">
+        SELECT od.name, SUM(od.number) as number
+        FROM order_detail od
+                 LEFT JOIN orders o ON od.order_id = o.id
+        WHERE o.status = 5
+          AND o.order_time &gt;= #{begin}
+          AND o.order_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+        GROUP BY od.name
+        ORDER BY number DESC
+        LIMIT 10
+    </select>
+
 </mapper>
