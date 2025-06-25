@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.WebSocket.WebSocketServer;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.*;
@@ -30,7 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -52,6 +55,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     @Override
     public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO) {
@@ -117,16 +123,33 @@ public class OrderServiceImpl implements OrderService {
                 orders.getUserId().toString() // 用户openid,需要从数据库获取
         );
 
-        // 封装返回结果
-        OrderPaymentVO vo = OrderPaymentVO.builder()
+
+        // 更新订单状态、支付方式、支付时间等信息
+        Orders ordersToUpdate = new Orders();
+        ordersToUpdate.setId(orders.getId());
+        ordersToUpdate.setStatus(Orders.TO_BE_CONFIRMED); // 更新为待接单状态
+        ordersToUpdate.setPayStatus(Orders.PAID); // 更新为已支付
+        ordersToUpdate.setCheckoutTime(LocalDateTime.now()); // 支付时间
+        ordersToUpdate.setPayMethod(1); // 支付方式：微信支付
+        orderMapper.update(ordersToUpdate);
+
+        // 发送WebSocket消息.type,orderID,content
+        Map map = new HashMap();
+        map.put("type", "1");//1来电提醒,2催单
+        map.put("orderId", orders.getId());
+        map.put("content", "新订单，请及时处理，订单号:" + orderNumber);
+        //转换为JSON字符串
+        String message = JSONObject.toJSONString(map);
+        //发送WebSocket消息
+        webSocketServer.sendToAllClient(message);
+
+        return OrderPaymentVO.builder()
                 .nonceStr(jsonObject.getString("nonceStr"))
                 .paySign(jsonObject.getString("paySign"))
                 .timeStamp(jsonObject.getString("timeStamp"))
                 .signType(jsonObject.getString("signType"))
                 .packageStr(jsonObject.getString("package"))
                 .build();
-
-        return vo;
     }
 
     @Override
