@@ -25,15 +25,14 @@ import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -132,10 +131,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
+        //设置分页
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        //查询订单
         Page<Orders> ordersPage = (Page<Orders>) orderMapper.pageQuery(ordersPageQueryDTO);
         List<Orders> ordersList = ordersPage.getResult();
-        return new PageResult(ordersPage.getTotal(),ordersList);
+
+        // 构建OrderVO列表，包含订单详情
+        List<OrderVO> orderVOList = ordersList.stream().map(orders -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+
+            // 查询订单详情
+            List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(orders.getId());
+            orderVO.setOrderDetailList(orderDetails);
+
+            return orderVO;
+        }).toList();
+        return new PageResult(ordersPage.getTotal(),orderVOList);
     }
 
     // 查询订单详情
@@ -274,5 +287,52 @@ public class OrderServiceImpl implements OrderService {
         ordersToUpdate.setId(id);
         ordersToUpdate.setStatus(Orders.COMPLETED); //将状态设置为已完成
         orderMapper.update(ordersToUpdate);
+    }
+
+    //重复订单
+    @Override
+    public void repetition(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND); //订单不存在
+        }
+
+        // 查询原订单明细
+        List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(id);
+
+        //清空购物车
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.clearById(userId);
+
+
+        // 将订单明细转换为购物车项目
+        List<ShoppingCart> shoppingCartList = orderDetails.stream().map(detail -> {
+            ShoppingCart cart = new ShoppingCart();
+            // 复制基本信息
+            BeanUtils.copyProperties(detail, cart);
+            // 设置用户ID和创建时间
+            cart.setUserId(BaseContext.getCurrentId());
+            cart.setCreateTime(LocalDateTime.now());
+            return cart;
+        }).collect(Collectors.toList());
+
+        // 批量插入购物车
+        shoppingCartMapper.insertBatch(shoppingCartList);
+
+
+    }
+
+    //催单
+    @Override
+    public void reminder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND); //订单不存在
+        }
+        //判断订单状态
+        if (!Objects.equals(orders.getStatus(), Orders.DELIVERY_IN_PROGRESS)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR); //订单状态不允许提醒
+        }
+
     }
 }

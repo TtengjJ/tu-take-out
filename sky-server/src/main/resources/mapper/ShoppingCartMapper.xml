@@ -2,6 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.ShoppingCartMapper">
+    <insert id="insertBatch">
+        insert into shopping_cart (name, user_id, dish_id, setmeal_id,
+        dish_flavor, number, amount, image, create_time)
+        values
+        <foreach collection="list" item="cart" separator=",">
+            (#{cart.name}, #{cart.userId}, #{cart.dishId}, #{cart.setmealId},
+            #{cart.dishFlavor}, #{cart.number}, #{cart.amount}, #{cart.image},
+            #{cart.createTime})
+        </foreach>
+    </insert>
     <delete id="deleteByDTO">
         delete from shopping_cart
         where user_id = #{userId}

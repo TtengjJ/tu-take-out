@@ -29,4 +29,5 @@ public interface ShoppingCartMapper {
     void deleteByDTO(ShoppingCart shoppingCart);
 
 
+    void insertBatch(List<ShoppingCart> shoppingCartList);
 }
