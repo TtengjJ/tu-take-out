@@ -54,4 +54,6 @@ public interface SetmealMapper {
     void deleteBatchIds(List<Long> ids);
 
     void updateStatus(Integer status, Long id);
+
+    Integer getSetmealCountByStatus(int i);
 }

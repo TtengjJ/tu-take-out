@@ -60,4 +60,6 @@ public interface DishMapper {
     void updatestatus(Dish dish);
 
     List<Dish> getlist(Long categoryId);
+
+    Integer getDishCountByStatus(int i);
 }

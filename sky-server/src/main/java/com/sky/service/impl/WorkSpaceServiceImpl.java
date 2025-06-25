@@ -1,0 +1,117 @@
+package com.sky.service.impl;
+
+import com.sky.dto.OrdersPageQueryDTO;
+import com.sky.entity.Orders;
+import com.sky.mapper.DishMapper;
+import com.sky.mapper.OrderMapper;
+import com.sky.mapper.SetmealMapper;
+import com.sky.service.WorkSpaceService;
+import com.sky.vo.BusinessDataVO;
+import com.sky.vo.DishOverViewVO;
+import com.sky.vo.OrderOverViewVO;
+import com.sky.vo.SetmealOverViewVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+public class WorkSpaceServiceImpl implements WorkSpaceService {
+
+    @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
+    private DishMapper dishMapper;
+
+    @Autowired
+    private SetmealMapper  setmealMapper;
+
+    //今日数据查询
+    @Override
+    public BusinessDataVO getBusinessData() {
+        // 查询今日有效订单数
+        Integer todayOrderCount = orderMapper.getValidOrderCountByDate(LocalDate.now());
+        if (todayOrderCount == null) todayOrderCount = 0;
+
+        // 查询今日营业额
+        Double todayTurnover = orderMapper.getTurnoverByDate(LocalDate.now());
+        if (todayTurnover == null) todayTurnover = 0.0;
+
+        // 查询今日新增用户数
+        Long newUsers = orderMapper.getNewUserByDate(LocalDate.now());
+        Integer todayUserCount = newUsers != null ? newUsers.intValue() : 0;
+
+        // 订单完成率
+        Double orderCompletionRate = 0.0;
+        Integer totalOrders = orderMapper.getOrderCountByDate(LocalDate.now());
+        if (totalOrders != null && totalOrders > 0) {
+            Integer validOrders = orderMapper.getValidOrderCountByDate(LocalDate.now());
+            orderCompletionRate = validOrders != null ? validOrders / (double) totalOrders : 0.0;
+        }
+
+        // 平均客单价
+        Double unitPrice = 0.0;
+        if (todayOrderCount > 0) {
+            unitPrice = todayTurnover / todayOrderCount;
+        }
+
+
+        //封装数据
+        BusinessDataVO businessDataVO = new BusinessDataVO();
+        businessDataVO.setTurnover(todayTurnover);
+        businessDataVO.setValidOrderCount(todayOrderCount);
+        businessDataVO.setOrderCompletionRate(orderCompletionRate);
+        businessDataVO.setUnitPrice(unitPrice);
+        businessDataVO.setNewUsers(todayUserCount);
+        return businessDataVO;
+    }
+
+    @Override
+    public OrderOverViewVO getOrderOverView() {
+        // 使用 OrdersPageQueryDTO 作为查询条件
+        OrdersPageQueryDTO dto = new OrdersPageQueryDTO();
+        // 查询所有状态的订单
+        List<Orders> ordersList = orderMapper.pageQuery(dto);
+
+        // 创建统计对象
+        OrderOverViewVO orderOverViewVO = new OrderOverViewVO();
+
+        // 统计各个状态的订单数量
+        orderOverViewVO.setWaitingOrders((int) ordersList.stream().filter(o -> o.getStatus() == 2).count());
+        orderOverViewVO.setDeliveredOrders((int) ordersList.stream().filter(o -> o.getStatus() == 3).count());
+        orderOverViewVO.setCompletedOrders((int) ordersList.stream().filter(o -> o.getStatus() == 5).count());
+        orderOverViewVO.setCancelledOrders((int) ordersList.stream().filter(o -> o.getStatus() == 6).count());
+        orderOverViewVO.setAllOrders(ordersList.size());
+        return orderOverViewVO;
+    }
+
+    @Override
+    public DishOverViewVO getDishOverView() {
+        //查询起售数量
+        Integer sold = dishMapper.getDishCountByStatus(1);
+        //查询停售数量
+        Integer discontinued = dishMapper.getDishCountByStatus(0);
+
+        //返回结果
+        return DishOverViewVO.builder()
+                .sold(sold != null ? sold : 0)
+                .discontinued(discontinued != null ? discontinued : 0)
+                .build();
+    }
+
+    @Override
+    public SetmealOverViewVO getSetmealOverView() {
+        //查询起售数量
+        Integer sold = setmealMapper.getSetmealCountByStatus(1);
+        //查询停售数量
+        Integer discontinued = setmealMapper.getSetmealCountByStatus(0);
+        //返回结果
+        return SetmealOverViewVO.builder()
+                .sold(sold != null ? sold : 0)
+                .discontinued(discontinued != null ? discontinued : 0)
+                .build();
+
+    }
+}

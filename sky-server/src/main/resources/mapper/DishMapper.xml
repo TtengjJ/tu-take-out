@@ -71,5 +71,13 @@
                     </where>
                     order by update_time desc
     </select>
+    <select id="getDishCountByStatus" resultType="java.lang.Integer">
+        select count(*) from dish
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
 
 </mapper>
