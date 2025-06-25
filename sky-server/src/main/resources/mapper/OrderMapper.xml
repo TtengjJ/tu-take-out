@@ -34,6 +34,9 @@
         </set>
         where id = #{id}
     </update>
+
+
+
     <select id="getByNumber" resultType="com.sky.entity.Orders">
         select * from orders where number = #{number}
     </select>
