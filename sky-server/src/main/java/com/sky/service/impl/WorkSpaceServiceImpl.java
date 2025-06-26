@@ -114,4 +114,42 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
                 .build();
 
     }
+
+    @Override
+    public BusinessDataVO getBusinessData(LocalDate date) {
+        // 查询指定日期的有效订单数
+        Integer orderCount = orderMapper.getValidOrderCountByDate(date);
+        if (orderCount == null) orderCount = 0;
+
+        // 查询指定日期的营业额
+        Double turnover = orderMapper.getTurnoverByDate(date);
+        if (turnover == null) turnover = 0.0;
+
+        // 查询指定日期的新增用户数
+        Long newUsers = orderMapper.getNewUserByDate(date);
+        Integer userCount = newUsers != null ? newUsers.intValue() : 0;
+
+        // 订单完成率
+        Double orderCompletionRate = 0.0;
+        Integer totalOrders = orderMapper.getOrderCountByDate(date);
+        if (totalOrders != null && totalOrders > 0) {
+            Integer validOrders = orderMapper.getValidOrderCountByDate(date);
+            orderCompletionRate = validOrders != null ? validOrders / (double) totalOrders : 0.0;
+        }
+
+        // 平均客单价
+        Double unitPrice = 0.0;
+        if (orderCount > 0) {
+            unitPrice = turnover / orderCount;
+        }
+
+        // 封装数据
+        return BusinessDataVO.builder()
+                .turnover(turnover)
+                .validOrderCount(orderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .unitPrice(unitPrice)
+                .newUsers(userCount)
+                .build();
+    }
 }

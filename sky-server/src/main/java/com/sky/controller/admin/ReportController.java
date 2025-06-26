@@ -6,11 +6,11 @@ import com.sky.vo.OrderReportVO;
 import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,5 +72,14 @@ public class ReportController {
          log.info("获取销量排名报表数据，开始日期：{}，结束日期：{}", begin, end);
         SalesTop10ReportVO salesTop10Report = reportService.salesTop10Report(begin, end);
         return Result.success(salesTop10Report);
+     }
+
+        /**
+        * 导出报表
+         */
+     @GetMapping("/export")
+     public void export(HttpServletResponse response){
+        log.info("导出报表数据");
+         reportService.exportData(response);
      }
 }

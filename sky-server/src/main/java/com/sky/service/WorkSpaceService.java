@@ -5,6 +5,8 @@ import com.sky.vo.DishOverViewVO;
 import com.sky.vo.OrderOverViewVO;
 import com.sky.vo.SetmealOverViewVO;
 
+import java.time.LocalDate;
+
 public interface WorkSpaceService {
     BusinessDataVO getBusinessData();
 
@@ -13,4 +15,7 @@ public interface WorkSpaceService {
     DishOverViewVO getDishOverView();
 
     SetmealOverViewVO getSetmealOverView();
+
+    // 新增支持日期参数的方法
+    BusinessDataVO getBusinessData(LocalDate date);
 }
