@@ -13,6 +13,7 @@ import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -42,6 +43,7 @@ public class OrderController {
 
     //查询历史订单
     @GetMapping("/historyOrders")
+    @Cacheable(value = "orderCache", key = " 'orderHistory:' + #ordersPageQueryDTO.userId", unless = "#result.data == null")
     public Result<PageResult> historyOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
         log.info("查询历史订单：{}", ordersPageQueryDTO);
         // 设置当前用户ID
@@ -52,6 +54,7 @@ public class OrderController {
 
     //查询订单详情，数据封装不对可能导致页面没有信息
     @GetMapping("/orderDetail/{id}")
+    @Cacheable(value = "orderDetailCache", key = "#id")
     public Result<OrderVO> getOrderDetail(@PathVariable Long id) {
         log.info("查询订单详情，订单ID：{}", id);
         OrderVO orderVO= orderService.getOrderDetail(id);

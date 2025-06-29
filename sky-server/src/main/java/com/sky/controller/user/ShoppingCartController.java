@@ -29,6 +29,7 @@ public class ShoppingCartController {
         return Result.success();
     }
 
+    //查询购物车
     @GetMapping("/list")
     public Result<List<ShoppingCart>> list() {
         log.info("查询购物车");

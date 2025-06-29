@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -68,6 +69,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         return businessDataVO;
     }
 
+    // 获取订单概览数据
     @Override
     public OrderOverViewVO getOrderOverView() {
         // 使用 OrdersPageQueryDTO 作为查询条件
@@ -150,6 +152,45 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
                 .orderCompletionRate(orderCompletionRate)
                 .unitPrice(unitPrice)
                 .newUsers(userCount)
+                .build();
+    }
+
+    public BusinessDataVO getBusinessDataRange(LocalDate beginDate, LocalDate endDate) {
+        // 初始化累计值
+        double totalTurnover = 0.0;
+        int totalOrderCount = 0;
+        int totalValidOrderCount = 0;
+        double totalUnitPrice = 0.0;
+        int totalNewUsers = 0;
+
+        // 计算日期范围内的天数
+        long daysBetween = ChronoUnit.DAYS.between(beginDate, endDate);
+
+        // 循环遍历日期范围，并累加每日数据
+        for (int i = 0; i <= daysBetween; i++) {
+            LocalDate date = beginDate.plusDays(i);
+            BusinessDataVO dailyData = getBusinessData(date);
+
+            totalTurnover += dailyData.getTurnover();
+            totalOrderCount += orderMapper.getOrderCountByDate(date) ;
+            totalValidOrderCount += dailyData.getValidOrderCount();
+            totalUnitPrice += dailyData.getUnitPrice() * dailyData.getValidOrderCount(); // 总客单价 = 每日客单价 * 每日有效订单数
+            totalNewUsers += dailyData.getNewUsers();
+        }
+
+        // 计算平均客单价
+        double averageUnitPrice = totalValidOrderCount > 0 ? totalUnitPrice / totalValidOrderCount : 0.0;
+
+        // 计算订单完成率
+        double orderCompletionRate = totalOrderCount > 0 ? totalValidOrderCount / (double) totalOrderCount : 0.0;
+
+        // 返回累计数据
+        return BusinessDataVO.builder()
+                .turnover(totalTurnover)
+                .validOrderCount(totalValidOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .unitPrice(averageUnitPrice)
+                .newUsers(totalNewUsers)
                 .build();
     }
 }

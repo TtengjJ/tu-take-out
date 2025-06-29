@@ -73,6 +73,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
     }
 
+    //查询购物车
     @Override
     public List<ShoppingCart> showShoppingCart() {
         //获取当前用户id

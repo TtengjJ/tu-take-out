@@ -18,4 +18,6 @@ public interface WorkSpaceService {
 
     // 新增支持日期参数的方法
     BusinessDataVO getBusinessData(LocalDate date);
+
+    BusinessDataVO getBusinessDataRange(LocalDate beginDate, LocalDate endDate);
 }

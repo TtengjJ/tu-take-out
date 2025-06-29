@@ -18,7 +18,7 @@ public class OrderTask {
 
 
     //处理超时订单
-    @Scheduled(cron = "0 0/1 * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "0 0 * * * *") // 每小时执行一次
     public void handleTimeoutOrders() {
         log.info("定时处理超时订单：{}", LocalDateTime.now());
         //查询订单状态status=1（待付款）且下单时间超过15分钟的订单

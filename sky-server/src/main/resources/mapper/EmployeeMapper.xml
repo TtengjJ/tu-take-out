@@ -14,18 +14,6 @@
                 <if test="status != null">
                     status = #{status},
                 </if>
-                <if test="password != null">
-                        password = #{password},
-                </if>
-                <if test="name != null">
-                        name = #{name},
-                </if>
-                <if test="phone != null">
-                        phone = #{phone},
-                </if>
-                <if test="sex != null">
-                        sex = #{sex}
-                </if>
                 update_time = #{updateTime},update_user = #{updateUser}
             </set>
             where id = #{id}

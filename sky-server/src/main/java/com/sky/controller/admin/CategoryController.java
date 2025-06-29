@@ -8,6 +8,7 @@ import com.sky.result.Result;
 import com.sky.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class CategoryController {
      * @return
      */
     @PostMapping
+    @CacheEvict(value = "categoryCache", allEntries = true) // 清除所有分类缓存
     public Result<String> save(@RequestBody CategoryDTO categoryDTO){
         log.info("新增分类：{}", categoryDTO);
         categoryService.save(categoryDTO);
@@ -52,6 +54,7 @@ public class CategoryController {
      * @return
      */
     @DeleteMapping
+    @CacheEvict(value = "categoryCache", allEntries = true) // 清除所有分类缓存
     public Result<String> deleteById(Long id){
         log.info("删除分类：{}", id);
         categoryService.deleteById(id);
@@ -64,6 +67,7 @@ public class CategoryController {
      * @return
      */
     @PutMapping
+    @CacheEvict(value = "categoryCache", allEntries = true) // 清除所有分类缓存
     public Result<String> update(@RequestBody CategoryDTO categoryDTO){
         categoryService.update(categoryDTO);
         return Result.success();
@@ -73,6 +77,7 @@ public class CategoryController {
      * 启用、禁用分类
      */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "categoryCache", allEntries = true) // 清除所有分类缓存
     public Result<String> startOrStop(@PathVariable("status") Integer status, Long id){
         categoryService.startOrStop(status,id);
         return Result.success();

@@ -173,7 +173,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDate endDate = LocalDate.now().minusDays(1);//昨天
 
         //概览数据
-        BusinessDataVO businessDataVO= workSpaceService.getBusinessData(endDate);
+        BusinessDataVO businessDataVO= workSpaceService.getBusinessDataRange(beginDate,endDate);
 
         //写入excel文件
         //基于模版创建工作簿
@@ -197,7 +197,7 @@ public class ReportServiceImpl implements ReportService {
                 sheet.getRow(1).getCell(1).setCellValue("时间：" + beginDate + " 至 " + endDate);
                 XSSFRow row = sheet.getRow(3);
                 row.getCell(2).setCellValue(businessDataVO.getTurnover()); //营业额
-                row.getCell(4).setCellValue(businessDataVO.getOrderCompletionRate() * 100 + "%"); //订单完成率
+                row.getCell(4).setCellValue(String.format("%.6f%%", businessDataVO.getOrderCompletionRate() * 100));
                 row.getCell(6).setCellValue(businessDataVO.getNewUsers()); //新增用户
 
                 row = sheet.getRow(4);
@@ -210,7 +210,7 @@ public class ReportServiceImpl implements ReportService {
                 for(int i = 0; i < 30; i++) {
                     LocalDate date = beginDate.plusDays(i);
                     //获取当天营业数据
-                    BusinessDataVO dailyData = workSpaceService.getBusinessData(LocalDate.now().minusDays(i + 30));
+                    BusinessDataVO dailyData = workSpaceService.getBusinessData(date);
                     //填充，从第八行
                     row= sheet.getRow(7 + i);
                     row.getCell(1).setCellValue(date.toString()); //日期
