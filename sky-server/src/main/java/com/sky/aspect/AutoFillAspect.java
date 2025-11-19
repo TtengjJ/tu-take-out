@@ -26,9 +26,7 @@ public class AutoFillAspect {
     //切入点
     //在执行增改方法时，自动填充公共字段
     @Pointcut("execution(* com.sky.mapper.*.*(..)) && @annotation(com.sky.annotation.AutoFill)")
-    public void autofillPointCut() {
-
-    }
+    public void autofillPointCut() {}
 
     //前置通知
     @Before("autofillPointCut()")
@@ -42,6 +40,7 @@ public class AutoFillAspect {
         Object[] args = joinPoint.getArgs();
         //获取实体类对象
         Object entity = args[0];
+
         //获取当前用户id
          Long userId = BaseContext.getCurrentId();
         // 获取当前时间
@@ -50,14 +49,13 @@ public class AutoFillAspect {
         //根据操作类型，填充公共字段
         if (Objects.requireNonNull(operationType) == OperationType.INSERT) {
             try {
-                //获取实体类对象的setCreateTime方法
+                //反射机制获取实体类中的特定方法
                 Method setCreateTime = entity.getClass().getMethod(AutoFillConstant.SET_CREATE_TIME, LocalDateTime.class);
-                //Createuser
                 Method setCreateUser = entity.getClass().getMethod(AutoFillConstant.SET_CREATE_USER, Long.class);
-                // updateTime
                 Method setUpdateTime = entity.getClass().getMethod(AutoFillConstant.SET_UPDATE_TIME, LocalDateTime.class);
-                // updateuser
                 Method setUpdateUser = entity.getClass().getMethod(AutoFillConstant.SET_UPDATE_USER, Long.class);
+
+                //invoke反射：运行时动态调用实体对象的方法
                 //调用setCreateTime方法，填充创建时间
                 setCreateTime.invoke(entity, now);
                 //调用setCreateUser方法，填充创建人
@@ -67,7 +65,7 @@ public class AutoFillAspect {
                 //调用setUpdateUser方法，填充更新人
                 setUpdateUser.invoke(entity, userId);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("自动填充字段时发生异常", e);
             }
         }
         else if (OperationType.UPDATE.equals(operationType)) {
@@ -79,7 +77,7 @@ public class AutoFillAspect {
                 //调用setUpdateUser方法，填充更新人
                 setUpdateUser.invoke(entity, userId);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("自动填充字段时发生异常", e);
             }
 
         }

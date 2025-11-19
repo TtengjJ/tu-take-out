@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ShopController {
 
+    // 定义店铺状态常量
     public final static String SHOP_STATUS = "SHOP:STATUS";
     public static final Integer DEFAULT_STATUS = 0; // 默认店铺状态为关闭
 
@@ -21,13 +22,17 @@ public class ShopController {
     private RedisTemplate<String,Object> redisTemplate;
 
     @GetMapping("/status")
+    // 获取店铺状态
     public Result<Integer> getStatus(){
+        // 从redis中获取店铺状态
         Integer status = (Integer) redisTemplate.opsForValue().get(SHOP_STATUS);
+        // 如果redis中没有店铺状态，则设置默认状态
         if (status == null){
             status = DEFAULT_STATUS;
             redisTemplate.opsForValue().set(SHOP_STATUS,status);
         }
         log.info("获取店铺状态：{}",status==0?"打样中":"营业中");
-        return Result.success( status);
+        // 返回店铺状态
+        return Result.success(status);
     }
 }

@@ -1,11 +1,9 @@
 package com.sky.config;
 
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import com.sky.interceptor.JwtTokenAdminInterceptor;
 import com.sky.interceptor.JwtTokenUserInterceptor;
 import com.sky.json.JacksonObjectMapper;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,11 +12,19 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
 
 import java.util.List;
 
 @Configuration
+@EnableKnife4j
 @Slf4j
 public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
@@ -57,23 +63,21 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      * 配置 OpenAPI (Knife4j)
      */
     @Bean
-    public OpenAPI openApi() {
-        // 创建一个新的 OpenAPI 对象
-        return new OpenAPI()
-                // 设置 OpenAPI 的信息
-                .info(new Info()
-                        // 设置 OpenAPI 的标题
-                        .title("苍穹外卖项目接口文档")
-                        // 设置 OpenAPI 的版本号
-                        .version("2.0")
-                        // 设置 OpenAPI 的描述
-                        .description("苍穹外卖项目接口文档"))
-                // 设置 OpenAPI 的安全要求
-                .schemaRequirement("BearerAuth",
-                        new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT"));
+    public Docket createRestApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.sky.controller"))
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("苍穹外卖项目接口文档")
+                .version("2.0")
+                .description("苍穹外卖项目接口文档")
+                .build();
     }
 
     @Override
@@ -86,4 +90,16 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         // 将消息转换器对象添加到转换器列表中，并放在首位
         converters.addFirst(converter);
     }
+
+    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("doc.html")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+
+        registry.addResourceHandler("/favicon.ico")
+                .addResourceLocations("classpath:/static/");
+    }
+
 }

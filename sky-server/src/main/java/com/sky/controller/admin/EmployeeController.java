@@ -11,6 +11,7 @@ import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -82,7 +83,7 @@ public class EmployeeController {
         return Result.success(employeeService.getPage(employeePageQueryDTO));
     }
 
-    //状态设置
+    //状态设
     @PostMapping("/status/{status}")
     public Result<String> update(@PathVariable Integer status, Long id) {
         log.info("设置员工状态：{}，id：{}", status, id);

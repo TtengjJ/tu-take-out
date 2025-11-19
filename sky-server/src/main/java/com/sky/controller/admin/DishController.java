@@ -103,7 +103,9 @@ public class DishController {
         return Result.success();
     }
 
+// 清理缓存
     private void cleanCache(String pattern) {
+        // 获取符合pattern的所有key
         Set<String> keys = redisTemplate.keys(pattern);
         redisTemplate.delete(keys);
     }

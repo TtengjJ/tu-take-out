@@ -35,7 +35,7 @@
         <druid>1.2.23</druid>
         <pagehelper>1.4.6</pagehelper>
         <aliyun.sdk.oss>3.17.4</aliyun.sdk.oss>
-        <knife4j>4.5.0</knife4j>
+        <knife4j>3.0.3</knife4j>
         <aspectj>1.9.22.1</aspectj>
         <jjwt>0.9.1</jjwt>
         <jakarta.xml.bind-api>4.0.2</jakarta.xml.bind-api>
@@ -133,7 +133,7 @@
             <!-- API文档 -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>${knife4j}</version>
             </dependency>
 
