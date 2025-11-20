@@ -65,7 +65,7 @@ public class DishServiceImpl implements DishService {
      */
     public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
-        Page<Dish> page = dishMapper.pageQuery(dishPageQueryDTO);
+        Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -98,20 +98,18 @@ public class DishServiceImpl implements DishService {
     /**
      * 根据id查询菜品和对应的口味数据
      */
-    public DishDTO getByIdWithFlavor(Long id) {
+    public DishVO getByIdWithFlavor(Long id) {
         // 查询菜品数据
         Dish dish = dishMapper.getById(id);
 
         // 查询口味数据
         List<DishFlavor> dishFlavors = dishFlavorMapper.getByDishId(id);
 
-        // 将查询到的数据封装到DTO中
-        //返回的数据结构需要与提交表单时的数据结构保持一致（都使用 DishDTO）（用于编辑）
-        DishDTO dishDTO = new DishDTO();
-        BeanUtils.copyProperties(dish, dishDTO);
-        dishDTO.setFlavors(dishFlavors);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(dishFlavors);
 
-        return dishDTO;
+        return dishVO;
     }
 
     /**
@@ -150,8 +148,8 @@ public class DishServiceImpl implements DishService {
     /**
      * 根据分类id查询菜品
      */
-    public List<DishVO> list(Dish dishlist) {
-        List<Dish> dishList = dishMapper.list(dishlist);
+    public List<DishVO> list(Dish dishWithCategoryId) {
+        List<Dish> dishList = dishMapper.list(dishWithCategoryId);
         List<DishVO> dishVOList = new ArrayList<>();
 
         for (Dish dish : dishList) {
