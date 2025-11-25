@@ -59,8 +59,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private WebSocketServer webSocketServer;
     // 定义消息类型常量
-    private static final String MESSAGE_TYPE_NEW_ORDER = "1";
-    private static final String MESSAGE_TYPE_REMINDER = "2";
+    private static final Integer MESSAGE_TYPE_NEW_ORDER = 1;
+    private static final Integer MESSAGE_TYPE_REMINDER = 1;
     //发送消息
     private void sendReminderMessage(Orders order) {
         String content = String.format("催单，请及时处理，订单号:%s", order.getNumber());
@@ -73,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 抽取发送消息的方法
-    private void sendOrderMessage(String type, Orders order, String content) {
+    private void sendOrderMessage(Integer type, Orders order, String content) {
         Map<String, Object> messageMap = new HashMap<>(3);
         messageMap.put("type", type);
         messageMap.put("orderId", order.getId());
@@ -108,11 +108,12 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
         orders.setOrderTime(LocalDateTime.now());
         orders.setStatus(Orders.PENDING_PAYMENT);//待付款
-        orders.setUserId(BaseContext.getCurrentId()); //用户id,从当前线程中获取
+        orders.setUserId(userID); //用户id,从当前线程中获取
         orders.setNumber(String.valueOf(System.currentTimeMillis()));//订单号,使用当前时间戳
         orders.setPayStatus(Orders.UN_PAID);//未支付
         orders.setPhone(addressBook.getPhone());//电话,DTO中不包含
         orders.setConsignee(addressBook.getConsignee());//收货人,addressBook中包含
+        orders.setAddress(addressBook.getDetail());//地址,addressBook中包含
         orderMapper.insert(orders);
         //向订单详情表插入多条数据
         List<OrderDetail> orderDetailList = shoppingCartList.stream().map((item) -> {

@@ -13,6 +13,7 @@ import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class OrderController {
 
     // 订单支付
     @PutMapping("/payment")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         log.info("订单支付：{}", ordersPaymentDTO);
         OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
@@ -63,6 +65,7 @@ public class OrderController {
 
     //取消订单
     @PutMapping("/cancel/{id}")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, key = "#id")
     public Result<String> cancelOrder(@PathVariable Long id) {
         log.info("取消订单，订单ID：{}", id);
         // 调用服务层取消订单
@@ -80,6 +83,7 @@ public class OrderController {
 
     //催单
     @GetMapping("/reminder/{id}")
+    @CacheEvict(value = "orderCache", allEntries = true)
     public Result reminder(@PathVariable Long id) {
         log.info("用户催单，订单ID：{}", id);
         orderService.reminder(id);

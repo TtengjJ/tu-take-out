@@ -8,6 +8,7 @@ import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class OrderController {
 
     //取消订单
     @PutMapping("/cancel")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<String> cancelOrder(@RequestBody OrdersCancelDTO ordersCancelDTO) {
         log.info("取消订单，订单ID：{}，取消原因：{}", ordersCancelDTO.getId(), ordersCancelDTO.getCancelReason());
         orderService.cancelOrder(ordersCancelDTO.getId());
@@ -53,6 +55,7 @@ public class OrderController {
 
     //接单，ordersConfirmDTO只包含必要的字段：订单id和状态
     @PutMapping("/confirm")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<String> confirmOrder(@RequestBody OrdersConfirmDTO ordersConfirmDTO) {
         log.info("接单，订单ID：{}", ordersConfirmDTO.getId());
         orderService.confirmOrder(ordersConfirmDTO);
@@ -61,6 +64,7 @@ public class OrderController {
 
     //拒单
     @PutMapping("/rejection")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<String> rejectOrder(@RequestBody OrdersRejectionDTO ordersRejectionDTO) {
         log.info("拒单，订单ID：{}", ordersRejectionDTO.getId());
         orderService.conRejectOrder(ordersRejectionDTO);
@@ -69,6 +73,7 @@ public class OrderController {
 
     //派送
     @PutMapping("/delivery/{id}")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<String> deliveryOrder(@PathVariable Long id) {
         log.info("派送订单，订单ID：{}", id);
         orderService.deliveryOrder(id);
@@ -77,6 +82,7 @@ public class OrderController {
 
     //完成订单
     @PutMapping("/complete/{id}")
+    @CacheEvict(value = {"orderCache", "orderDetailCache"}, allEntries = true)
     public Result<String> completeOrder(@PathVariable Long id) {
         log.info("完成订单，订单ID：{}", id);
         orderService.completeOrder(id);
